@@ -4,7 +4,6 @@ from flask import Flask
 import threading
 import os
 
-# 8935104652:AAFCyvWtoX0j6ch9uOVej2Igfboe4qn9RCQ
 TOKEN = os.environ.get('BOT_TOKEN', '8935104652:AAFCyvWtoX0j6ch9uOVej2Igfboe4qn9RCQ')
 bot = telebot.TeleBot(TOKEN)
 
@@ -23,7 +22,7 @@ def run_flask():
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
 
-# --- VERİ TABANI (Moderasyon için dolu, gerçekçi statik veriler) ---
+# --- VERİ TABANI ---
 LIGLER = {
     "nba": {
         "isim": "🇺🇸 NBA",
@@ -110,6 +109,33 @@ def sakatlik_menu():
 # --- KOMUTLAR ---
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    # --- PROMO GÖRSEL + BUTON ---
+    promo_caption = "💰 **2000 TL Deneme Bonusu Almak İçin TIKLA**"
+    
+    foto_url = "https://i.imgur.com/KtziCD1.jpg"
+    
+    markup_promo = InlineKeyboardMarkup()
+    btn_bonus = InlineKeyboardButton("🎁 2000 TL Deneme Bonusu Al", url="https://jasino.to/cLtb")
+    markup_promo.add(btn_bonus)
+    
+    try:
+        bot.send_photo(
+            message.chat.id,
+            photo=foto_url,
+            caption=promo_caption,
+            reply_markup=markup_promo,
+            parse_mode='Markdown'
+        )
+    except Exception as e:
+        # Foto yüklenemezse sadece yazı + buton gönder
+        bot.send_message(
+            message.chat.id,
+            promo_caption,
+            reply_markup=markup_promo,
+            parse_mode='Markdown'
+        )
+
+    # --- NORMAL KARŞILAMA MESAJI ---
     karsilama = (
         f"Merhaba {message.from_user.first_name}! 🏀\n\n"
         "**Global Basketbol Gündemi Botu'na hoş geldin!**\n\n"
@@ -177,7 +203,6 @@ def takim_ara(message):
     
     bulundu = False
     for anahtar, veri in TAKIMLAR.items():
-        # Takım anahtarı veya isminin içinde arama terimi geçiyor mu?
         if anahtar in aranan or aranan in veri['isim'].lower():
             metin = (
                 f"🛡️ **{veri['isim']}**\n\n"
@@ -200,3 +225,4 @@ if __name__ == '__main__':
     threading.Thread(target=run_flask, daemon=True).start()
     print("Global Basketbol Botu çalışıyor...")
     bot.infinity_polling()
+        
